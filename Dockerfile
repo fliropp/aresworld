@@ -1,4 +1,5 @@
 FROM dr.api.no/amedia/go-app:1.12.5-0 AS build_base
+#FROM alpine:3.10
 
 RUN mkdir -p /app/build
 WORKDIR /app/build
@@ -36,3 +37,6 @@ WORKDIR /app
 ENTRYPOINT ["/app/bin/aresworld"]
 
 EXPOSE 8080
+
+#CMD go run main.go server
+

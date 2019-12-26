@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -37,6 +38,7 @@ func (s *WebServer) routes() {
 	router := http.NewServeMux()
 	router.HandleFunc("/ping", s.handlePing())
 	router.HandleFunc("/whoami/", s.handleWhoAmI())
+	router.HandleFunc("/gopykube", s.handleGoPyKube())
 	s.AddHandle(prefix, router)
 }
 
@@ -45,6 +47,37 @@ func (s *WebServer) handlePing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("pong!"))
+	}
+}
+
+func (s *WebServer) handleGoPyKube() http.HandlerFunc {
+	// private scope here because of the closure, which is nice :)
+	return func(w http.ResponseWriter, r *http.Request) {
+		var result interface{}
+		getURL := "http://192.168.64.2:30559/"
+
+		req, err := http.NewRequest("GET", getURL, nil)
+		if err != nil {
+			fmt.Errorf("ERROR")
+		}
+		req.Header.Add("Accept", "application/json")
+		resp, err := httpclient.client.Do(req)
+		if err != nil {
+			fmt.Errorf("ERROR")
+
+		}
+
+		defer resp.Body.Close()
+
+		err = json.NewDecoder(resp.Body).Decode(&result)
+		if err != nil {
+			fmt.Errorf("ERROR")
+
+		}
+		result, _ := json.Marshal(response)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(result))
 	}
 }
 
